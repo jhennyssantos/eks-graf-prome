@@ -22,6 +22,10 @@ resource "aws_iam_role_policy_attachment" "eks_latency_policy_attachment" {
   role       = aws_iam_role.eks_latency_role.name
 }
 
+resource "aws_iam_role_policy_attachment" "eks_service_policy_attachment" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  role       = aws_iam_role.eks_latency_role.name
+}
 # # Optionally, enable Security Groups for Pods
 # # Reference: https://docs.aws.amazon.com/eks/latest/userguide/security-groups-for-pods.html
 # resource "aws_iam_role_policy_attachment" "example-AmazonEKSVPCResourceController" {
