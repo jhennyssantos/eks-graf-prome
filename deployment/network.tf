@@ -110,3 +110,60 @@ resource "aws_route_table" "route_pri_eks_latency" {
     Name = "rt-private-${var.project}"
   }
 }
+
+# Create security group for workers
+resource "aws_security_group" "sg_eks_worker" {
+  name        = "sg-worker-${var.project}"
+  vpc_id      = aws_vpc.vpc_eks_latency.id
+
+  ingress {
+    description      = "Comunicacao entre os nos"
+    from_port        = 0
+    to_port          = 65535
+    protocol         = "-1"
+    cidr_blocks      = flatten([cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 0), cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 1), cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 2), cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 3)])
+  }
+
+   ingress {
+    description      = "Comunicacao com o plano de controle do cluster"
+    from_port        = 1025
+    to_port          = 65535
+    protocol         = "tcp"
+    cidr_blocks      = flatten([cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 2), cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 3)])
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "sg-worker-${var.project}"
+  }
+}
+
+
+# Create security group for Control Plane
+resource "aws_security_group" "sg_eks_control" {
+  name        = "sg-control-${var.project}"
+  vpc_id      = aws_vpc.vpc_eks_latency.id
+
+  ingress {
+    from_port        = 0
+    to_port          = 65535
+    protocol         = "tcp"
+    cidr_blocks      = flatten([cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 0), cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 1), cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 2), cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 3)])
+  }
+  egress {
+    from_port        = 0
+    to_port          = 65535
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "sg-control-${var.project}"
+  }
+}
