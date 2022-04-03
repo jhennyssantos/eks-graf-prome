@@ -1,3 +1,4 @@
+## IAM to EKS Cluster
 resource "aws_iam_role" "eks_latency_role" {
   name = "role-${var.project}"
 
@@ -26,9 +27,35 @@ resource "aws_iam_role_policy_attachment" "eks_service_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
   role       = aws_iam_role.eks_latency_role.name
 }
-# # Optionally, enable Security Groups for Pods
-# # Reference: https://docs.aws.amazon.com/eks/latest/userguide/security-groups-for-pods.html
-# resource "aws_iam_role_policy_attachment" "example-AmazonEKSVPCResourceController" {
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-#   role       = aws_iam_role.example.name
-# }
+
+
+# IAM to EKS Nodes
+resource "aws_iam_role" "eks_nodes_role" {
+  name = "role-nodes-${var.project}"
+
+  assume_role_policy = jsonencode({
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+    Version = "2012-10-17"
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.eks_nodes_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "AmazonEKS_CNI_Policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.eks_nodes_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.eks_nodes_role.name
+}
