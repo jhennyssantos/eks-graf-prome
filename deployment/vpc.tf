@@ -2,8 +2,8 @@
 resource "aws_vpc" "vpc_eks_latency" {
   cidr_block = var.vpc_cidr
 
-  # enable_dns_hostnames = true
-  # enable_dns_support   = true
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
   tags = {
     Name = "vpc-${var.project}"
@@ -32,6 +32,7 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name = "pub-az-${var.project}"
+    "kubernetes.io/cluster/cluster-${var.project}" = "shared"
   }
 }
 
@@ -48,6 +49,7 @@ resource "aws_subnet" "private" {
 
   tags = {
     Name = "pri-az-${var.project}"
+    "kubernetes.io/cluster/cluster-${var.project}" = "shared"
   }
 }
 
@@ -108,5 +110,31 @@ resource "aws_route_table" "route_pri_eks_latency" {
 
   tags = {
     Name = "rt-private-${var.project}"
+  }
+}
+
+
+
+
+# Create security group for Control Plane
+resource "aws_security_group" "sg_eks_control" {
+  name        = "sg-control-${var.project}"
+  vpc_id      = aws_vpc.vpc_eks_latency.id
+
+  ingress {
+    from_port        = 0
+    to_port          = 65535
+    protocol         = "tcp"
+    cidr_blocks      = flatten([cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 0), cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 1), cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 2), cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, 3)])
+  }
+  egress {
+    from_port        = 0
+    to_port          = 65535
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "sg-control-${var.project}"
   }
 }

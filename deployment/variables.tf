@@ -9,7 +9,7 @@ variable "project" {
 }
 
 variable "availability_zones" {
-  default = 2
+  default = 3
   type = number
 }
 
@@ -20,4 +20,24 @@ variable "vpc_cidr" {
 variable "subnet_cidr_bits" {
   default = 8
   type = number
+}
+
+variable "version_eks" {
+    default = 1.21
+    type = number
+}
+
+variable "ami_type" {
+    default = "AL2_x86_64"
+    type = string 
+}
+
+variable "capacity_type" {
+    default = "ON_DEMAND"
+    type = string
+}
+
+variable "disk_size" {
+    default = 30
+    type = number
 }
