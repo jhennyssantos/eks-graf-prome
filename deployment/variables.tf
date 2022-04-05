@@ -51,3 +51,22 @@ variable "namespace" {
   type    = string
   default = "monitoring"
 }
+
+variable "admin_user" {
+  type    = string
+  default = "admin"
+}
+
+variable "service_account" {
+  description = "Name of the Service Account for Grafana"
+  type        = string
+  default     = ""
+}
+
+variable "pdb" {
+  description = "PodDisruptionBudget for Grafana"
+  type        = map(any)
+  default = {
+    minAvailable = 1
+  }
+}
