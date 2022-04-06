@@ -10,6 +10,7 @@ provider "helm" {
 }
 
 terraform {
+  required_version = ">= 1"
   backend "s3" {
     region  = "us-east-1"
     bucket  = "tfstates"
