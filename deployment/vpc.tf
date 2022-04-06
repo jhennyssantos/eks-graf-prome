@@ -89,7 +89,7 @@ resource "aws_nat_gateway" "nat" {
   count = var.availability_zones
   
   allocation_id = aws_eip.elastic_ip_eks.id
-  subnet_id     = aws_subnet.public[count.index].id
+  subnet_id     = aws_subnet.public[0].id
 
   tags = {
     Name = "NAT-${var.project}"
@@ -98,20 +98,27 @@ resource "aws_nat_gateway" "nat" {
   depends_on = [aws_internet_gateway.gw]
 }
 
-# Create route table private
-resource "aws_route_table" "route_pri_eks_latency" {
-  count = var.availability_zones
-  vpc_id = aws_vpc.vpc_eks_latency.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.nat[count.index].id
-  }
-
-  tags = {
-    Name = "rt-private-${var.project}"
-  }
+# Add route to route table
+resource "aws_route" "main" {
+  route_table_id         = aws_vpc.vpc_eks_latency.default_route_table_id
+  nat_gateway_id         = aws_nat_gateway.nat[0].id
+  destination_cidr_block = "0.0.0.0/0"
 }
+
+# # Create route table private
+# resource "aws_route_table" "route_pri_eks_latency" {
+#   count = var.availability_zones
+#   vpc_id = aws_vpc.vpc_eks_latency.id
+
+#   route {
+#     cidr_block = "0.0.0.0/0"
+#     gateway_id = aws_nat_gateway.nat[count.index].id
+#   }
+
+#   tags = {
+#     Name = "rt-private-${var.project}"
+#   }
+# }
 
 
 
