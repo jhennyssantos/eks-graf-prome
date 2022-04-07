@@ -12,9 +12,9 @@ provider "helm" {
 terraform {
   required_version = ">= 1"
   backend "s3" {
-    region  = "eu-west-1"
-    bucket  = "tfstates"
+    region  = "us-east-1"
+    bucket  = "eks-tfstate"
     key     = "eks_latency.tfstate"
-    encrypt = true
+    encrypt = false
   }
 }
